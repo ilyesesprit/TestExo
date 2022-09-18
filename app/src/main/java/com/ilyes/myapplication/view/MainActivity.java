@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ilyes.myapplication.R;
+import com.ilyes.myapplication.network.NetworkConnectionInterceptor;
 import com.ilyes.myapplication.view.adapter.CitiesWeatherListAdapter;
 import com.ilyes.myapplication.databinding.ActivityMainBinding;
 import com.ilyes.myapplication.viewmodel.MainActivityViewModel;
@@ -24,12 +25,14 @@ public class MainActivity extends AppCompatActivity {
     CitiesWeatherListAdapter citiesWeatherListAdapter;
     MainActivityViewModel viewModel;
     boolean stop = false;
+    NetworkConnectionInterceptor networkConnectionInterceptor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initDataBinding();
         initViewModel();
+         networkConnectionInterceptor= new NetworkConnectionInterceptor(this);
         mainBinding.recommencer.setOnClickListener(view -> {
             mainBinding.progressBarz.setVisibility(View.VISIBLE);
             mainBinding.citiesWeather.setVisibility(View.GONE);
