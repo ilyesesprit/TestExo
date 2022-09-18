@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
-import android.widget.Toast;
 
 import com.ilyes.myapplication.R;
+import com.ilyes.myapplication.model.ApiError;
 import com.ilyes.myapplication.network.NetworkConnectionInterceptor;
 import com.ilyes.myapplication.view.adapter.CitiesWeatherListAdapter;
 import com.ilyes.myapplication.databinding.ActivityMainBinding;
@@ -25,39 +25,65 @@ public class MainActivity extends AppCompatActivity {
     CitiesWeatherListAdapter citiesWeatherListAdapter;
     MainActivityViewModel viewModel;
     boolean stop = false;
-    NetworkConnectionInterceptor networkConnectionInterceptor;
+    NetworkConnectionInterceptor interceptor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        interceptor = new NetworkConnectionInterceptor(this);
+
         initDataBinding();
         initViewModel();
-         networkConnectionInterceptor= new NetworkConnectionInterceptor(this);
         mainBinding.recommencer.setOnClickListener(view -> {
             mainBinding.progressBarz.setVisibility(View.VISIBLE);
+            mainBinding.progressBarz.setProgressBar(0);
+            mainBinding.progressBarz.setTimer();
             mainBinding.citiesWeather.setVisibility(View.GONE);
             mainBinding.recommencer.setVisibility(View.GONE);
             this.getViewModelStore().clear();
             viewModel.resetCitiesWeather(this);
             initViewModel();
-
-
         });
 
 
     }
 
     private void initViewModel() {
-
         viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        if (interceptor.isConnected()) {
+            setErrorView(false);
+            viewModel.setCitiesList(getResources().getStringArray(R.array.cities));
+            viewModel.getCitiesWeather(this).observe(MainActivity.this, cityWeathers -> {
+                if (cityWeathers.size() == 1 && cityWeathers.get(0) instanceof ApiError) {
+                    mainBinding.progressBarz.getTimer().cancel();
+                    mainBinding.messageError.setText(((ApiError) cityWeathers.get(0)).getUrl());
+                    viewModel.restart();
+                    setErrorView(true);
+                    mCountDownTimer.cancel();
+                    stop = true;
+                    viewModel.resetCitiesWeather(this);
 
-        viewModel.setCitiesList(getResources().getStringArray(R.array.cities));
-        viewModel.getCitiesWeather(this).observe(MainActivity.this, cityWeathers -> citiesWeatherListAdapter.setCityWeatherList(cityWeathers));
-        if (viewModel.getTimerRunning()) {
-            pauseTimer();
+                } else {
+                    citiesWeatherListAdapter.setCityWeatherList(cityWeathers);
+                }
+            });
+            if (viewModel.getTimerRunning()) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
         } else {
-            startTimer();
+            mainBinding.progressBarz.getTimer().cancel();
+            setErrorView(true);
         }
+    }
+
+    private void setErrorView(boolean show) {
+        mainBinding.progressBarz.setVisibility(show ? View.GONE : View.VISIBLE);
+        mainBinding.citiesWeather.setVisibility(View.GONE);
+        mainBinding.recommencer.setVisibility(!show ? View.GONE : View.VISIBLE);
+        mainBinding.messageError.setVisibility(!show ? View.GONE : View.VISIBLE);
+
     }
 
 
@@ -72,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        System.out.println("onResume viewModel.getTimerRunning() " + viewModel.getTimerRunning());
         if (viewModel.getTimerRunning()) {
             startTimer();
         }
@@ -97,8 +122,6 @@ public class MainActivity extends AppCompatActivity {
                     percentage = (int) (((float) finishedSeconds / (float) MainActivityViewModel.START_TIME_IN_MILLIS) * 100.0);
                     mainBinding.progressBarz.setProgressBar(percentage);
                     mainBinding.progressBarz.setPercentageText(new StringBuilder().append(percentage).append("%").toString());
-
-
                 } else {
                     this.cancel();
                     stop = false;
@@ -109,12 +132,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                viewModel.finish();
                 mainBinding.progressBarz.setProgressBar(100);
                 mainBinding.progressBarz.getTimer().cancel();
                 mainBinding.progressBarz.setVisibility(View.GONE);
                 mainBinding.citiesWeather.setVisibility(View.VISIBLE);
                 mainBinding.recommencer.setVisibility(View.VISIBLE);
+                viewModel.finish();
 
             }
         }
@@ -147,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         mCountDownTimer.cancel();
         mainBinding.progressBarz.getTimer().cancel();
-                stop = true;
+        stop = true;
         this.getViewModelStore().clear();
         viewModel.resetCitiesWeather(this);
         MainActivity.this.finish();

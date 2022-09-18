@@ -20,6 +20,7 @@ public class CityWeather
     public String name;
     public int cod;
 
+
     public class Clouds{
         public int all;
     }

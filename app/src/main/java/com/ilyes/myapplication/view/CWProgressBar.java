@@ -28,6 +28,23 @@ public class CWProgressBar extends LinearLayout {
         return timer;
     }
 
+    public void setTimer() {
+
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (index >= listMessage.length) {
+                    index = 0;
+                }
+                cwProgressBarBinding.messageText.setText(listMessage[index++]);
+            }
+        }, 0, 6000);
+
+
+    }
+
+
     public CWProgressBar(Context context) {
 
         super(context);
@@ -53,17 +70,8 @@ public class CWProgressBar extends LinearLayout {
         cwProgressBarBinding.progressBar.setProgress(progress);
         cwProgressBarBinding.percentage.setText(percentageText);
         a.recycle();
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (index >= listMessage.length) {
-                    index = 0;
-                }
-                System.out.println(MessageFormat.format("test timer progress listMessage[{0}] {1}", index, listMessage[index]));
-                cwProgressBarBinding.messageText.setText(listMessage[index++]);
-            }
-        }, 0, 6000);
+        setTimer();
+
     }
 
     public CWProgressBar(Context context, AttributeSet attrs, int defStyle) {

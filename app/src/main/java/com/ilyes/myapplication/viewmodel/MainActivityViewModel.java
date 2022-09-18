@@ -16,8 +16,6 @@ import com.ilyes.myapplication.repository.CityWeatherRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.rxjava3.core.Observable;
-
 public class MainActivityViewModel extends ViewModel {
     private CityWeatherRepository cityWeatherRepository;
     private MutableLiveData<List<CityWeather>> mCitiesWeather;
@@ -44,8 +42,8 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void resetCitiesWeather(LifecycleOwner lifecycleOwner) {
-       if (cityWeatherRepository.getTimer()!=null) cityWeatherRepository.getTimer().cancel();
-        mCitiesWeather.removeObservers(lifecycleOwner);
+       if (cityWeatherRepository!=null && cityWeatherRepository.getTimer()!=null) cityWeatherRepository.getTimer().cancel();
+       if(mCitiesWeather !=null && mCitiesWeather.hasObservers()) mCitiesWeather.removeObservers(lifecycleOwner);
         mCitiesWeather = new MutableLiveData<>();
     }
 
@@ -84,6 +82,7 @@ public class MainActivityViewModel extends ViewModel {
 
     public void restart() {
         mTimeLeftInMillis = START_TIME_IN_MILLIS;
+
     }
 
     public void updateCounter(long millisUntilFinished) {
@@ -94,11 +93,7 @@ public class MainActivityViewModel extends ViewModel {
         return mTimeLeftInMillis < START_TIME_IN_MILLIS;
     }
 
-    public void recommencer(View v) {
 
-        restart();
-
-    }
 
 
 }
