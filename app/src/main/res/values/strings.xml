@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">EXOMINDTest</string>
+    <string name="iconpattern">https://openweathermap.org/img/wn/{0}@2x.png</string>
+    <string name="recommencer">Recommencer</string>
+    <string name="suivant">Suivant</string>
+    <string name="bienvenue">Bienvenue</string>
+
+    <string-array name="messages">
+        <item>Nous téléchargeons les données…</item>
+        <item>C’est presque fini…</item>
+        <item>Plus que quelques secondes avant d’avoir le résultat…</item>
+    </string-array>
+
+
+    <string-array name="cities">
+        <item>48.114700:-1.679400</item>
+        <item>48.8534:2.3488</item>
+        <item>47.218102:-1.552800</item>
+        <item>44.836151:-0.580816</item>
+        <item>45.7578137:4.8320114</item>
+    </string-array>
+
+</resources>

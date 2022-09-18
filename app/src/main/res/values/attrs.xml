@@ -1,0 +1,9 @@
+<resources>
+    <declare-styleable name="CWProgressBar">
+        <attr name="messageText" format="string" />
+        <attr name="progressBar" format="integer" />
+        <attr name="percentageText" format="string" />
+        <attr name="android:ems" />
+
+    </declare-styleable>
+</resources>
